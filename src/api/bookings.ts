@@ -18,7 +18,7 @@ export async function createBooking(data: CreateBookingRequest): Promise<Booking
       customer_phone: data.customer_phone,
     })
   }
-  return apiPost<Booking>('/api/bookings', data)
+  return apiPost<Booking>('/api/bookings/', data)
 }
 
 export async function getBooking(id: string): Promise<Booking> {
@@ -28,5 +28,5 @@ export async function getBooking(id: string): Promise<Booking> {
     if (!booking) throw new Error('Booking not found')
     return booking
   }
-  return apiGet<Booking>(`/api/bookings/${id}`)
+  return apiGet<Booking>(`/api/bookings/${id}/`)
 }

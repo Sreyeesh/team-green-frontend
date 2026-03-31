@@ -9,7 +9,7 @@ export async function getShop(slug: string): Promise<Shop> {
     if (!shop) throw new Error('Shop not found')
     return shop
   }
-  return apiGet<Shop>(`/api/shops/${slug}`)
+  return apiGet<Shop>(`/api/shops/${slug}/`)
 }
 
 export async function getBarbers(slug: string): Promise<Barber[]> {
@@ -19,7 +19,7 @@ export async function getBarbers(slug: string): Promise<Barber[]> {
     if (!shop) throw new Error('Shop not found')
     return mockBarbers[shop.id] || []
   }
-  return apiGet<Barber[]>(`/api/shops/${slug}/barbers`)
+  return apiGet<Barber[]>(`/api/shops/${slug}/barbers/`)
 }
 
 export async function getServices(slug: string): Promise<Service[]> {
@@ -29,7 +29,7 @@ export async function getServices(slug: string): Promise<Service[]> {
     if (!shop) throw new Error('Shop not found')
     return mockServices[shop.id] || []
   }
-  return apiGet<Service[]>(`/api/shops/${slug}/services`)
+  return apiGet<Service[]>(`/api/shops/${slug}/services/`)
 }
 
 export async function getAvailability(
@@ -48,7 +48,7 @@ export async function getAvailability(
       return matchesDate && matchesBarber
     })
   }
-  return apiGet<Slot[]>(`/api/shops/${slug}/availability`, {
+  return apiGet<Slot[]>(`/api/shops/${slug}/availability/`, {
     service_id: params.service_id,
     date: params.date,
     ...(params.barber_id ? { barber_id: params.barber_id } : {}),

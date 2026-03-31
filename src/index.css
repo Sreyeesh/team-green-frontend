@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0F0F0F;
+  --color-bg-surface: #1A1A1A;
+  --color-bg-elevated: #242424;
+  --color-border-subtle: #2E2E2E;
+  --color-gold: #C8A55A;
+  --color-gold-hover: #D4B56A;
+  --color-gold-muted: #8B7340;
+  --color-text-primary: #F5F0E8;
+  --color-text-secondary: #9A9490;
+  --color-error: #C75050;
+  --color-success: #5A8A5A;
+
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}

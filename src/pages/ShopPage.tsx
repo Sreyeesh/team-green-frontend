@@ -4,8 +4,6 @@ import { getShop, getBarbers, getServices } from '../api/shops'
 import type { Shop, Barber, Service } from '../types'
 import { formatPrice } from '../lib/utils'
 
-type DesignOption = 'A' | 'B' | 'C'
-
 /* ──────────────────────────── Data Hook ──────────────────────────── */
 
 function useShopData(slug: string) {
@@ -52,41 +50,6 @@ function groupByCategory(services: Service[]): Record<string, Service[]> {
     groups[s.category].push(s)
   }
   return groups
-}
-
-/* ──────────────────────────── Switcher ──────────────────────────── */
-
-function OptionSwitcher({
-  current,
-  onChange,
-}: {
-  current: DesignOption
-  onChange: (o: DesignOption) => void
-}) {
-  return (
-    <div className="fixed top-20 right-4 z-50 bg-bg-elevated/95 backdrop-blur-sm border border-border-subtle rounded-sm p-4 space-y-2 shadow-xl">
-      <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-[0.2em] mb-3">
-        Design Option
-      </p>
-      {(['A', 'B', 'C'] as DesignOption[]).map((opt) => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt)}
-          className={`block w-full text-left px-3 py-2 text-sm rounded-sm transition-all duration-200 ${
-            current === opt
-              ? 'text-gold bg-bg-surface border-l-2 border-gold'
-              : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/50'
-          }`}
-        >
-          {opt === 'A'
-            ? 'A — Vintage Luxe'
-            : opt === 'B'
-              ? 'B — Modern Classic'
-              : 'C — Dark Editorial'}
-        </button>
-      ))}
-    </div>
-  )
 }
 
 /* ──────────────────────────── SVG Ornaments ──────────────────────────── */
@@ -166,17 +129,19 @@ function StickyMobileCTA({ slug }: { slug: string }) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   OPTION A — Vintage Luxe
+   ShopPage — Vintage Luxe
    Centered layout, ornamental dividers, dotted-leader menu, gold rings
    ══════════════════════════════════════════════════════════════════════ */
 
-function OptionA({ shop, barbers, services, slug }: {
-  shop: Shop
-  barbers: Barber[]
-  services: Service[]
-  slug: string
-}) {
+export default function ShopPage() {
+  const { slug } = useParams<{ slug: string }>()
+  const { shop, barbers, services, loading, error } = useShopData(slug ?? '')
+
+  if (loading) return <LoadingSkeleton />
+  if (error || !shop) return <ErrorState message={error ?? 'Shop not found'} />
+
   const grouped = groupByCategory(services)
+  const shopSlug = slug ?? ''
 
   return (
     <div className="min-h-screen bg-bg-primary pb-24 sm:pb-12">
@@ -283,318 +248,14 @@ function OptionA({ shop, barbers, services, slug }: {
           Reserve your chair and let our master barbers take care of the rest.
         </p>
         <Link
-          to={`/shop/${slug}/book`}
+          to={`/shop/${shopSlug}/book`}
           className="inline-block px-10 py-4 bg-gold text-bg-primary font-heading text-sm uppercase tracking-[0.15em] hover:bg-gold-light transition-colors duration-200"
         >
           Book Your Appointment
         </Link>
       </section>
 
-      <StickyMobileCTA slug={slug} />
+      <StickyMobileCTA slug={shopSlug} />
     </div>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   OPTION B — Modern Classic
-   Left-aligned header, horizontal barber scroll, clean minimal services
-   ══════════════════════════════════════════════════════════════════════ */
-
-function OptionB({ shop, barbers, services, slug }: {
-  shop: Shop
-  barbers: Barber[]
-  services: Service[]
-  slug: string
-}) {
-  const grouped = groupByCategory(services)
-
-  return (
-    <div className="min-h-screen bg-bg-primary pb-24 sm:pb-12">
-      {/* ── Shop Header ── */}
-      <section className="pt-12 pb-10 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-start gap-6">
-          {shop.logo_url && (
-            <img
-              src={shop.logo_url}
-              alt={shop.name}
-              className="w-20 h-20 rounded-sm object-cover border border-border-subtle flex-shrink-0"
-            />
-          )}
-          <div className="flex-1">
-            <h1 className="font-heading text-3xl md:text-4xl text-text-primary mb-2">{shop.name}</h1>
-            <p className="text-text-secondary font-body text-sm leading-relaxed mb-4 max-w-xl">
-              {shop.description}
-            </p>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary text-xs font-body">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-gold/60" />
-                {shop.address}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-gold/60" />
-                {shop.phone}
-              </span>
-            </div>
-          </div>
-          <Link
-            to={`/shop/${slug}/book`}
-            className="hidden sm:inline-block px-6 py-3 bg-gold text-bg-primary font-heading text-xs uppercase tracking-[0.15em] hover:bg-gold-light transition-colors whitespace-nowrap flex-shrink-0"
-          >
-            Book Now
-          </Link>
-        </div>
-      </section>
-
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="h-px bg-gradient-to-r from-gold/20 via-gold/10 to-transparent" />
-      </div>
-
-      {/* ── Barbers (Horizontal Scroll) ── */}
-      <section className="py-10 px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-[10px] text-gold-muted uppercase tracking-[0.3em] mb-1 font-body">Team</p>
-          <h2 className="font-heading text-2xl text-text-primary mb-6">Our Barbers</h2>
-          <div className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6 scrollbar-hide">
-            {barbers.map((barber) => (
-              <div
-                key={barber.id}
-                className="snap-start flex-shrink-0 w-64 bg-bg-surface border border-border-subtle rounded-sm overflow-hidden group hover:border-gold/30 transition-colors duration-200"
-              >
-                <img
-                  src={barber.photo_url}
-                  alt={barber.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-heading text-lg text-text-primary mb-1">{barber.name}</h3>
-                  <p className="text-text-secondary text-xs font-body leading-relaxed mb-3 line-clamp-2">{barber.bio}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {barber.specialties.map((s) => (
-                      <span key={s} className="text-[9px] uppercase tracking-wider text-gold-muted bg-bg-elevated px-2 py-0.5 rounded-sm">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="h-px bg-gradient-to-r from-gold/20 via-gold/10 to-transparent" />
-      </div>
-
-      {/* ── Services (Clean List) ── */}
-      <section className="py-10 px-6">
-        <div className="max-w-5xl mx-auto">
-          <p className="text-[10px] text-gold-muted uppercase tracking-[0.3em] mb-1 font-body">Services</p>
-          <h2 className="font-heading text-2xl text-text-primary mb-8">What We Offer</h2>
-          <div className="space-y-8">
-            {Object.entries(grouped).map(([category, items]) => (
-              <div key={category}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-px bg-gold/50" />
-                  <h3 className="text-xs uppercase tracking-[0.2em] text-gold font-body font-medium">{category}</h3>
-                </div>
-                <div className="space-y-1">
-                  {items.map((svc) => (
-                    <div
-                      key={svc.id}
-                      className="flex items-center justify-between py-3 px-4 hover:bg-bg-surface/50 transition-colors rounded-sm group"
-                    >
-                      <div className="flex-1 min-w-0 mr-4">
-                        <div className="flex items-baseline gap-3">
-                          <span className="font-body text-text-primary text-sm">{svc.name}</span>
-                          <span className="text-text-secondary text-xs">{svc.duration_minutes} min</span>
-                        </div>
-                        <p className="text-text-secondary text-xs font-body mt-0.5 truncate">{svc.description}</p>
-                      </div>
-                      <span className="font-heading text-gold text-sm whitespace-nowrap">{formatPrice(svc.price)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="h-px bg-gradient-to-r from-gold/20 via-gold/10 to-transparent" />
-      </div>
-
-      {/* ── Book CTA ── */}
-      <section className="py-12 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 bg-bg-surface border border-border-subtle p-8 rounded-sm">
-          <div>
-            <h2 className="font-heading text-xl text-text-primary mb-1">Ready to book?</h2>
-            <p className="text-text-secondary font-body text-sm">Pick a time that works for you.</p>
-          </div>
-          <Link
-            to={`/shop/${slug}/book`}
-            className="px-8 py-3 bg-gold text-bg-primary font-heading text-xs uppercase tracking-[0.15em] hover:bg-gold-light transition-colors whitespace-nowrap"
-          >
-            Book Your Appointment
-          </Link>
-        </div>
-      </section>
-
-      <StickyMobileCTA slug={slug} />
-    </div>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   OPTION C — Dark Editorial
-   Dramatic name, grayscale→color barber photos, two-col editorial grid
-   ══════════════════════════════════════════════════════════════════════ */
-
-function OptionC({ shop, barbers, services, slug }: {
-  shop: Shop
-  barbers: Barber[]
-  services: Service[]
-  slug: string
-}) {
-  const grouped = groupByCategory(services)
-
-  return (
-    <div className="min-h-screen bg-bg-primary pb-24 sm:pb-12">
-      {/* ── Shop Header ── */}
-      <section className="pt-16 pb-10 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl text-text-primary tracking-tight leading-none mb-6">
-            {shop.name}
-          </h1>
-          <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-16">
-            <p className="text-text-secondary font-body text-sm leading-relaxed max-w-md">
-              {shop.description}
-            </p>
-            <div className="flex flex-col gap-1 text-text-secondary text-xs font-body md:ml-auto">
-              <span>{shop.address}</span>
-              <span>{shop.phone}</span>
-            </div>
-            {shop.logo_url && (
-              <img
-                src={shop.logo_url}
-                alt={shop.name}
-                className="w-14 h-14 object-cover border border-border-subtle hidden md:block"
-              />
-            )}
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="h-px bg-border-subtle" />
-      </div>
-
-      {/* ── Barbers (Grid, Grayscale → Color) ── */}
-      <section className="py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-heading text-3xl md:text-4xl text-text-primary mb-10">The Barbers</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {barbers.map((barber) => (
-              <div key={barber.id} className="group cursor-default">
-                <div className="aspect-square overflow-hidden bg-bg-surface mb-4">
-                  <img
-                    src={barber.photo_url}
-                    alt={barber.name}
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="font-heading text-xl text-text-primary mb-1">{barber.name}</h3>
-                <p className="text-text-secondary text-xs font-body leading-relaxed mb-3">{barber.bio}</p>
-                <div className="flex flex-wrap gap-2">
-                  {barber.specialties.map((s) => (
-                    <span key={s} className="text-[10px] uppercase tracking-wider text-gold/70 font-body">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="h-px bg-border-subtle" />
-      </div>
-
-      {/* ── Services (Two-Column Editorial) ── */}
-      <section className="py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-heading text-3xl md:text-4xl text-text-primary mb-10">Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-            {Object.entries(grouped).map(([category, items]) => (
-              <div key={category}>
-                <h3 className="font-heading text-lg text-gold mb-5 pb-2 border-b border-gold/20">{category}</h3>
-                <div className="space-y-4">
-                  {items.map((svc) => (
-                    <div key={svc.id} className="flex justify-between items-start gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-body text-text-primary text-sm font-medium">{svc.name}</span>
-                          <span className="text-text-secondary text-[10px] uppercase tracking-wider">{svc.duration_minutes}min</span>
-                        </div>
-                        <p className="text-text-secondary text-xs font-body mt-1 leading-relaxed">{svc.description}</p>
-                      </div>
-                      <span className="font-heading text-gold text-lg">{formatPrice(svc.price)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="h-px bg-border-subtle" />
-      </div>
-
-      {/* ── Book CTA ── */}
-      <section className="py-16 px-6 text-center">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-heading text-4xl md:text-5xl text-text-primary mb-6">
-            Your Next Cut<br className="hidden md:block" /> Starts Here
-          </h2>
-          <Link
-            to={`/shop/${slug}/book`}
-            className="inline-block px-12 py-4 border-2 border-gold text-gold font-heading text-sm uppercase tracking-[0.2em] hover:bg-gold hover:text-bg-primary transition-all duration-300"
-          >
-            Book Now
-          </Link>
-        </div>
-      </section>
-
-      <StickyMobileCTA slug={slug} />
-    </div>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   Main Export
-   ══════════════════════════════════════════════════════════════════════ */
-
-export default function ShopPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const [option, setOption] = useState<DesignOption>('A')
-  const { shop, barbers, services, loading, error } = useShopData(slug ?? '')
-
-  if (loading) return <LoadingSkeleton />
-  if (error || !shop) return <ErrorState message={error ?? 'Shop not found'} />
-
-  const props = { shop, barbers, services, slug: slug ?? '' }
-
-  return (
-    <>
-      <OptionSwitcher current={option} onChange={setOption} />
-      {option === 'A' && <OptionA {...props} />}
-      {option === 'B' && <OptionB {...props} />}
-      {option === 'C' && <OptionC {...props} />}
-    </>
   )
 }
